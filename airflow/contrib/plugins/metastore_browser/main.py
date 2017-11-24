@@ -24,6 +24,7 @@ from airflow.hooks.mysql_hook import MySqlHook
 from airflow.hooks.presto_hook import PrestoHook
 from airflow.plugins_manager import AirflowPlugin
 from airflow.www import utils as wwwutils
+from airflow import configuration
 
 METASTORE_CONN_ID = 'metastore_default'
 METASTORE_MYSQL_CONN_ID = 'metastore_mysql'
@@ -54,7 +55,8 @@ class MetastoreBrowserView(BaseView, wwwutils.DataProfilingMixin):
         h = MySqlHook(METASTORE_MYSQL_CONN_ID)
         df = h.get_pandas_df(sql)
         df.db = (
-            '<a href="/admin/metastorebrowserview/db/?db=' +
+            '<a href=' + configuration.get_url_prefix() +
+            '"/admin/metastorebrowserview/db/?db=' +
             df.db + '">' + df.db + '</a>')
         table = df.to_html(
             classes="table table-striped table-bordered table-hover",
@@ -163,7 +165,7 @@ bp = Blueprint(
     "metastore_browser", __name__,
     template_folder='templates',
     static_folder='static',
-    static_url_path='/static/metastore_browser')
+    static_url_path=configuration.get_url_prefix() + '/static/metastore_browser')
 
 
 # Defining the plugin class
